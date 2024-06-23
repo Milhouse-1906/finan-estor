@@ -19,8 +19,6 @@ function App() {
           <Route path="/projects">
             <Projects />
           </Route>
-          <Route path="/contact">
-          </Route>
           <Route path="/newproject">
             <NewProject />
           </Route>
