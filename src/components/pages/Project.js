@@ -25,7 +25,7 @@ function Project() {
     
     setTimeout(
       () =>
-        fetch(`http://localhost:/${id}`, {
+        fetch(`http://localhost:8080/projects/${id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ function Project() {
       return false
     }
 
-    fetch(`http://localhost:/${project.id}`, {
+    fetch(`http://localhost:8080/projects/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ function Project() {
    
     project.cost = newCost
 
-    fetch(`http://localhost:/${project.id}`, {
+    fetch(`http://localhost:8080/projects/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

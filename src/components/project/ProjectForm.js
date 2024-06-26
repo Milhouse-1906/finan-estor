@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import Input from './form/Input'
+import Input from '../form/Input_temp'
 import Select from '../form/Select'
 import SubmitButton from '../form/SubmitButton'
 
@@ -10,7 +10,7 @@ function ProjectForm({ handleSubmit, btnText, projectData }) {
   const [categories, setCategories] = useState([])
 
   useEffect(() => {
-    fetch('http://localhost:/', {
+    fetch('http://localhost:8080/categories', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

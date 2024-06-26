@@ -1,17 +1,15 @@
-import { useHistory } from 'react-router-dom'
-
-import ProjectForm from '../project/ProjectForm'
-
-import styles from './NewProject.module.css'
+import { useNavigate } from 'react-router-dom';
+import ProjectForm from '../project/ProjectForm';
+import styles from './NewProject.module.css';
 
 function NewProject() {
-  const history = useHistory()
+  const navigate = useNavigate();
 
   function createPost(project) {
-    project.cost = 0
-    project.services = []
+    project.cost = 0;
+    project.services = [];
 
-    fetch('http://localhost:/', {
+    fetch('http://localhost:8080/projects', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -20,8 +18,8 @@ function NewProject() {
     })
       .then((resp) => resp.json())
       .then((data) => {
-        history.push('/projects', { message: 'Projeto criado com sucesso!' })
-      })
+        navigate('/projects', { state: { message: 'Projeto criado com sucesso!' } });
+      });
   }
 
   return (
@@ -30,7 +28,7 @@ function NewProject() {
       <p>Crie seu projeto para depois adicionar os serviços</p>
       <ProjectForm handleSubmit={createPost} btnText="Criar Projeto" />
     </div>
-  )
+  );
 }
 
-export default NewProject
+export default NewProject;
