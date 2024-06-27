@@ -41,18 +41,35 @@ function Projects() {
   }, [])
 
   function removeProject(id) {
-    fetch(`http://localhost::8080/projects/${id}`, {
+    fetch(`http://localhost:8080/projects/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
     })
-      .then((resp) => resp.json())
-      .then((data) => {
-        setProjects(projects.filter((project) => project.id !== id))
-        setProjectMessage('Projeto removido com sucesso!')
+      .then((resp) => {
+        if (!resp.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return resp.text(); 
       })
+      .then((text) => {
+        if (text) {
+          return JSON.parse(text); 
+        } else {
+          return {}; 
+        }
+      })
+      .then((data) => {
+        setProjects(projects.filter((project) => project.id !== id));
+        setProjectMessage('Projeto removido com sucesso!');
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        setProjectMessage('Erro ao remover o projeto');
+      });
   }
+  
 
   return (
     <div className={styles.project_container}>

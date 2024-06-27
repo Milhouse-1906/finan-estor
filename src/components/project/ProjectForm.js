@@ -6,8 +6,12 @@ import SubmitButton from '../form/SubmitButton'
 import styles from './ProjectForm.module.css'
 
 function ProjectForm({ handleSubmit, btnText, projectData }) {
-  const [project, setProject] = useState(projectData || {})
-  const [categories, setCategories] = useState([])
+  const [project, setProject] = useState({
+    name: projectData?.name || '',
+    budget: projectData?.budget || '',
+    category: projectData?.category || null,
+  });
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     fetch('http://localhost:8080/categories', {
@@ -20,15 +24,15 @@ function ProjectForm({ handleSubmit, btnText, projectData }) {
       .then((data) => {
         setCategories(data)
       })
-  }, [])
+  }, []);
 
   const submit = (e) => {
-    e.preventDefault()
-    handleSubmit(project)
-  }
+    e.preventDefault();
+    handleSubmit(project);
+  };
 
   function handleChange(e) {
-    setProject({ ...project, [e.target.name]: e.target.value })
+    setProject({ ...project, [e.target.name]: e.target.value });
   }
 
   function handleCategory(e) {
@@ -38,7 +42,7 @@ function ProjectForm({ handleSubmit, btnText, projectData }) {
         id: e.target.value,
         name: e.target.options[e.target.selectedIndex].text,
       },
-    })
+    });
   }
 
   return (
@@ -64,11 +68,11 @@ function ProjectForm({ handleSubmit, btnText, projectData }) {
         text="Selecione a categoria"
         options={categories}
         handleOnChange={handleCategory}
-        value={project.category ? project.category.id : ''}
+        value={project.category ? project.category.id || '' : ''}
       />
       <SubmitButton text={btnText} />
     </form>
-  )
+  );
 }
 
-export default ProjectForm
+export default ProjectForm;

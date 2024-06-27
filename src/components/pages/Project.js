@@ -1,4 +1,4 @@
-import { parse, v4 as uuidv4 } from 'uuid'
+
 
 import { useParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
@@ -22,85 +22,112 @@ function Project() {
   const [type, setType] = useState('success')
 
   useEffect(() => {
-    
-    setTimeout(
-      () =>
-        fetch(`http://localhost:8080/projects/${id}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-          .then((resp) => resp.json())
-          .then((data) => {
-            setProject(data)
-            setServices(data.services)
-          }),
-      0,
-    )
-  }, [id])
+    fetch(`http://localhost:8080/projects/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((resp) => {
+        if (!resp.ok) {
+          throw new Error('A resposta da rede não foi bem-sucedida');
+        }
+        return resp.json(); 
+      })
+      .then((data) => {
+        setProject(data);
+        setServices(data.services);
+      })
+      .catch((error) => {
+        console.error('Erro ao buscar detalhes do projeto:', error);
+  
+      });
+  }, [id]);
+  
 
   function editPost(project) {
-    
     if (project.budget < project.cost) {
-      setMessage('O Orçamento não pode ser menor que o custo do projeto!')
-      setType('error')
-      return false
+      setMessage('O Orçamento não pode ser menor que o custo do projeto!');
+      setType('error');
+      return false;
     }
-
-    fetch(`http://localhost:8080/projects/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(project),
-    })
-      .then((resp) => resp.json())
-      .then((data) => {
-        setProject(data)
-        setShowProjectForm(!showProjectForm)
-        setMessage('Projeto atualizado!')
-        setType('success')
-      })
-  }
-
-  function createService(project) {
   
-    const lastService = project.services[project.services.length - 1]
-
-    lastService.id = uuidv4()
-
-    const lastServiceCost = lastService.cost
-
-    const newCost = parseFloat(project.cost) + parseFloat(lastServiceCost)
-
-    
-    if (newCost > parseFloat(project.budget)) {
-      setMessage('Orçamento ultrapassado, verifique o valor do serviço!')
-      setType('error')
-      project.services.pop()
-      return false
-    }
-
-   
-    project.cost = newCost
-
-    fetch(`http://localhost:8080/projects/${id}`, {
-      method: 'PATCH',
+    fetch(`http://localhost:8080/projects/update/${id}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(project),
     })
-      .then((resp) => resp.json())
-      .then((data) => {
-        setServices(data.services)
-        setShowServiceForm(!showServiceForm)
-        setMessage('Serviço adicionado!')
-        setType('success')
+      .then((resp) => {
+        if (!resp.ok) {
+          throw new Error('A resposta da rede não foi bem-sucedida');
+        }
+        return resp.json(); 
       })
+      .then((data) => {
+        setProject(data);
+        setShowProjectForm(!showProjectForm);
+        setMessage('Projeto atualizado!');
+        setType('success');
+      })
+      .catch((error) => {
+        console.error('Erro ao editar projeto:', error);
+        setMessage('Erro ao editar projeto. Tente novamente mais tarde.');
+        setType('error');
+      
+      });
   }
 
+  function createService(project, id) {
+    if (!project || !project.services || project.services.length === 0) {
+        console.error('Project or project services not defined properly.');
+        return false;
+    }
+
+    const lastService = project.services[project.services.length - 1];
+    lastService.id = id;
+
+    const lastServiceCost = parseFloat(lastService.cost);
+    const newCost = parseFloat(project.cost) + lastServiceCost;
+
+    if (newCost > parseFloat(project.budget)) {
+        setMessage('Orçamento ultrapassado, verifique o valor do serviço!');
+        setType('error');
+        project.services.pop();
+        return false;
+    }
+
+    project.cost = newCost;
+
+    fetch(`http://localhost:8080/projects/service/${project.id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(project),
+    })
+    .then(resp => {
+        if (!resp.ok) {
+            throw new Error('A resposta da rede não foi bem-sucedida');
+        }
+        return resp.json();
+    })
+    .then(data => {
+        // Atualiza os serviços com os dados retornados após a modificação
+        setServices(data.services); // Verifique se `setServices` está corretamente implementada
+        setShowServiceForm(false); // Altere o estado do formulário de serviço se necessário
+        setMessage('Serviço adicionado!');
+        setType('success');
+    })
+    .catch(error => {
+        console.error('Erro ao adicionar serviço:', error);
+        setMessage('Erro ao adicionar serviço. Tente novamente mais tarde.');
+        setType('error');
+    });
+}
+
+  
   function removeService(id, cost) {
     const servicesUpdated = project.services.filter(
       (service) => service.id !== id,
@@ -111,13 +138,20 @@ function Project() {
     projectUpdated.services = servicesUpdated
     projectUpdated.cost = parseFloat(projectUpdated.cost) - parseFloat(cost)
 
-    fetch(`${projectUpdated.id}`, {
-      method: 'PATCH',
+    fetch(`http://localhost:8080/projects/${id}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(projectUpdated),
     })
+      .then((resp) => {
+        if (!resp.ok) {
+          throw new Error('A resposta da rede não foi bem-sucedida');
+        }
+        return resp.json(); 
+      
+      })
       .then((resp) => resp.json())
       .then((data) => {
         setProject(projectUpdated)
