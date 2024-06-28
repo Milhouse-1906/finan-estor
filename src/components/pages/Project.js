@@ -128,7 +128,21 @@ function Project() {
 }
 
   
-  function removeService(id, cost) {
+function removeService(id, cost) {
+  fetch(`http://localhost:8080/service/${id}`, {  
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+  .then((resp) => {
+    if (!resp.ok) {
+      throw new Error('A resposta da rede não foi bem-sucedida');
+    }
+    return resp.json().catch(() => ({})); // Trata resposta vazia ou inválida como um objeto vazio {}
+  })
+  .then((data) => {
+    // Atualize o estado local após a exclusão
     const servicesUpdated = project.services.filter(
       (service) => service.id !== id,
     )
@@ -138,27 +152,17 @@ function Project() {
     projectUpdated.services = servicesUpdated
     projectUpdated.cost = parseFloat(projectUpdated.cost) - parseFloat(cost)
 
-    fetch(`http://localhost:8080/projects/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(projectUpdated),
-    })
-      .then((resp) => {
-        if (!resp.ok) {
-          throw new Error('A resposta da rede não foi bem-sucedida');
-        }
-        return resp.json(); 
-      
-      })
-      .then((resp) => resp.json())
-      .then((data) => {
-        setProject(projectUpdated)
-        setServices(servicesUpdated)
-        setMessage('Serviço removido com sucesso!')
-      })
-  }
+    // Atualize o estado local imediatamente
+    setProject(projectUpdated);
+    setServices(servicesUpdated);
+    setMessage('Serviço removido com sucesso!');
+  })
+  .catch((error) => {
+    console.error('Erro ao remover serviço:', error);
+    setMessage('Erro ao remover serviço. Tente novamente mais tarde.');
+    setType('error');
+  });
+}
 
   function toggleProjectForm() {
     setShowProjectForm(!showProjectForm)
