@@ -129,7 +129,12 @@ function Project() {
 
   
 function removeService(id, cost) {
-  fetch(`http://localhost:8080/service/${id}`, {  
+  if (!id) {
+    console.error('ID do serviço não definido ou inválido:', id);
+    return;
+  }
+
+  fetch(`http://localhost:8080/projects/${project.id}/services/${services.id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
@@ -145,12 +150,11 @@ function removeService(id, cost) {
     // Atualize o estado local após a exclusão
     const servicesUpdated = project.services.filter(
       (service) => service.id !== id,
-    )
+    );
 
-    const projectUpdated = project
-
-    projectUpdated.services = servicesUpdated
-    projectUpdated.cost = parseFloat(projectUpdated.cost) - parseFloat(cost)
+    const projectUpdated = project 
+    projectUpdated.services = servicesUpdated;
+    projectUpdated.cost = parseFloat(projectUpdated.cost) - parseFloat(cost);
 
     // Atualize o estado local imediatamente
     setProject(projectUpdated);
@@ -163,6 +167,7 @@ function removeService(id, cost) {
     setType('error');
   });
 }
+
 
   function toggleProjectForm() {
     setShowProjectForm(!showProjectForm)
