@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-
 import Container from '../layout/Container'
 import Loading from '../layout/Loading'
-
 import LinkButton from '../layout/LinkButton'
 import ProjectCard from '../project/ProjectCard'
 import Message from '../layout/Message'

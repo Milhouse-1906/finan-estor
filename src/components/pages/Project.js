@@ -100,12 +100,12 @@ function Project() {
 
     project.cost = newCost;
 
-    fetch(`http://localhost:8080/projects/service/${project.id}`, {
-        method: 'PUT',
+    fetch(`http://localhost:8080/projects/${project.id}/services`, {  // Adicionada a barra aqui
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(project),
+        body: JSON.stringify(lastService),  // Enviando apenas o serviço a ser adicionado
     })
     .then(resp => {
         if (!resp.ok) {
@@ -115,8 +115,8 @@ function Project() {
     })
     .then(data => {
         // Atualiza os serviços com os dados retornados após a modificação
-        setServices(data.services); // Verifique se `setServices` está corretamente implementada
-        setShowServiceForm(false); // Altere o estado do formulário de serviço se necessário
+        setServices(prevServices => [...prevServices, data]);  // Adicionando o novo serviço à lista existente
+        setShowServiceForm(false);  // Altere o estado do formulário de serviço se necessário
         setMessage('Serviço adicionado!');
         setType('success');
     })
@@ -127,6 +127,7 @@ function Project() {
     });
 }
 
+
   
 function removeService(id, cost) {
   if (!id) {
@@ -134,7 +135,7 @@ function removeService(id, cost) {
     return;
   }
 
-  fetch(`http://localhost:8080/projects/${project.id}/services/${services.id}`, {
+  fetch(`http://localhost:8080/projects/${project.id}/services/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
@@ -152,7 +153,7 @@ function removeService(id, cost) {
       (service) => service.id !== id,
     );
 
-    const projectUpdated = project 
+    const projectUpdated = project;
     projectUpdated.services = servicesUpdated;
     projectUpdated.cost = parseFloat(projectUpdated.cost) - parseFloat(cost);
 
@@ -167,6 +168,7 @@ function removeService(id, cost) {
     setType('error');
   });
 }
+
 
 
   function toggleProjectForm() {
