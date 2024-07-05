@@ -12,6 +12,7 @@ function ProjectForm({ handleSubmit, btnText, projectData }) {
     category: projectData?.category || null,
   });
   const [categories, setCategories] = useState([]);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     fetch('http://localhost:8080/categories', {
@@ -22,13 +23,26 @@ function ProjectForm({ handleSubmit, btnText, projectData }) {
     })
       .then((resp) => resp.json())
       .then((data) => {
-        setCategories(data)
-      })
+        setCategories(data);
+      });
   }, []);
+
+  const validate = () => {
+    const newErrors = {};
+    if (!project.name) newErrors.name = 'O nome do projeto é obrigatório';
+    if (!project.budget) newErrors.budget = 'O orçamento do projeto é obrigatório';
+    if (!project.category) newErrors.category = 'A categoria do projeto é obrigatória';
+    return newErrors;
+  };
 
   const submit = (e) => {
     e.preventDefault();
-    handleSubmit(project);
+    const newErrors = validate();
+    if (Object.keys(newErrors).length === 0) {
+      handleSubmit(project);
+    } else {
+      setErrors(newErrors);
+    }
   };
 
   function handleChange(e) {
@@ -55,6 +69,7 @@ function ProjectForm({ handleSubmit, btnText, projectData }) {
         handleOnChange={handleChange}
         value={project.name}
       />
+      {errors.name && <span className={styles.error}>{errors.name}</span>}
       <Input
         type="number"
         text="Orçamento do projeto"
@@ -63,13 +78,15 @@ function ProjectForm({ handleSubmit, btnText, projectData }) {
         handleOnChange={handleChange}
         value={project.budget}
       />
+      {errors.budget && <span className={styles.error}>{errors.budget}</span>}
       <Select
         name="category_id"
         text="Selecione a categoria"
         options={categories}
         handleOnChange={handleCategory}
-        value={project.category ? project.category.id || '' : ''}
+        value={project.category ? project.category.id : ''}
       />
+      {errors.category && <span className={styles.error}>{errors.category}</span>}
       <SubmitButton text={btnText} />
     </form>
   );

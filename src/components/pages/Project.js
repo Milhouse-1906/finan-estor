@@ -100,12 +100,12 @@ function Project() {
 
     project.cost = newCost;
 
-    fetch(`http://localhost:8080/projects/${project.id}/services`, {  // Adicionada a barra aqui
+    fetch(`http://localhost:8080/projects/${project.id}/services`, {  
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(lastService),  // Enviando apenas o serviço a ser adicionado
+        body: JSON.stringify(lastService),  
     })
     .then(resp => {
         if (!resp.ok) {
@@ -114,9 +114,9 @@ function Project() {
         return resp.json();
     })
     .then(data => {
-        // Atualiza os serviços com os dados retornados após a modificação
-        setServices(prevServices => [...prevServices, data]);  // Adicionando o novo serviço à lista existente
-        setShowServiceForm(false);  // Altere o estado do formulário de serviço se necessário
+        
+        setServices(prevServices => [...prevServices, data]);  
+        setShowServiceForm(false); 
         setMessage('Serviço adicionado!');
         setType('success');
     })
@@ -127,8 +127,6 @@ function Project() {
     });
 }
 
-
-  
 function removeService(id, cost) {
   if (!id) {
     console.error('ID do serviço não definido ou inválido:', id);
@@ -145,22 +143,23 @@ function removeService(id, cost) {
     if (!resp.ok) {
       throw new Error('A resposta da rede não foi bem-sucedida');
     }
-    return resp.json().catch(() => ({})); // Trata resposta vazia ou inválida como um objeto vazio {}
+    return resp.json().catch(() => ({})); 
   })
   .then((data) => {
-    // Atualize o estado local após a exclusão
     const servicesUpdated = project.services.filter(
       (service) => service.id !== id,
     );
 
-    const projectUpdated = project;
+    const projectUpdated = { ...project };
     projectUpdated.services = servicesUpdated;
-    projectUpdated.cost = parseFloat(projectUpdated.cost) - parseFloat(cost);
 
-    // Atualize o estado local imediatamente
+    const newCost = parseFloat(projectUpdated.cost) - parseFloat(cost);
+    projectUpdated.cost = newCost >= 0 ? newCost : 0; 
+
     setProject(projectUpdated);
     setServices(servicesUpdated);
     setMessage('Serviço removido com sucesso!');
+    setType('success');
   })
   .catch((error) => {
     console.error('Erro ao remover serviço:', error);
@@ -168,8 +167,6 @@ function removeService(id, cost) {
     setType('error');
   });
 }
-
-
 
   function toggleProjectForm() {
     setShowProjectForm(!showProjectForm)
